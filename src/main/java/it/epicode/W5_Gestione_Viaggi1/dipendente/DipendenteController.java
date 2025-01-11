@@ -30,9 +30,20 @@ public class DipendenteController {
         return ResponseEntity.ok(dipendenteService.findById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Dipendente> createDipendente(@RequestBody Dipendente dipendente) {
-        return new ResponseEntity<>(dipendenteService.createDipendente(dipendente), HttpStatus.CREATED);
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Dipendente> createDipendente(@RequestParam("username") String username,
+                                                       @RequestParam("nome") String nome,
+                                                       @RequestParam("cognome") String cognome,
+                                                       @RequestParam("email") String email,
+                                                       @RequestParam("avatar") MultipartFile avatar) {
+        Dipendente nuovoDipendente = new Dipendente();
+        nuovoDipendente.setUsername(username);
+        nuovoDipendente.setNome(nome);
+        nuovoDipendente.setCognome(cognome);
+        nuovoDipendente.setEmail(email);
+        Dipendente dipendenteCreato = dipendenteService.createDipendenteWithAvatar(nuovoDipendente, avatar);
+        return ResponseEntity.ok(dipendenteCreato);
+
     }
 
     @PatchMapping(path="/{id}", consumes = "multipart/form-data")

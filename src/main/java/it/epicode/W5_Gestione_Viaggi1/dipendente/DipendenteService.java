@@ -3,6 +3,7 @@ package it.epicode.W5_Gestione_Viaggi1.dipendente;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import it.epicode.W5_Gestione_Viaggi1.cloudinary.CloudinaryService;
 import it.epicode.W5_Gestione_Viaggi1.exceptions.UploadException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -24,6 +25,9 @@ public class DipendenteService {
     private DipendenteRepo dipendenteRepo;
 
     @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
     private Cloudinary cloudinary;
 
 
@@ -36,13 +40,22 @@ public class DipendenteService {
             dipendente.setAvatar(avatarUrl);
             return dipendenteRepo.save(dipendente);
         } catch (Exception e) {
-            throw new RuntimeException("Errore durante il caricamento dell'immagine", e);
+            throw new UploadException("Errore durante il caricamento dell'immagine", e);
         }
     }
 
 
     public Dipendente createDipendente(@Valid Dipendente dipendente) {
       return   dipendenteRepo.save(dipendente);
+    }
+
+
+    public Dipendente createDipendenteWithAvatar(@Valid Dipendente dipendente, MultipartFile file) {
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinaryService.uploader(file, "dipendenti");
+            dipendente.setAvatar(result.get("url").toString());
+        }
+        return dipendenteRepo.save(dipendente);
     }
 
 
@@ -65,6 +78,16 @@ public class DipendenteService {
         BeanUtils.copyProperties(modifiedDipendente,dipendente);
 
         return dipendenteRepo.save(dipendente);
+    }
+
+    public Dipendente updateDipendenteWithAvatar(Long id, @Valid Dipendente dipendenteModificato,MultipartFile file) {
+        Dipendente dipendente = findById(id);
+        BeanUtils.copyProperties(dipendenteModificato, dipendente,"id");
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinaryService.uploader(file, "dipendenti");
+            dipendente.setAvatar(result.get("url").toString());
+        }
+        return dipendenteRepo.save(dipendenteModificato);
     }
 
     public void deleteDipendente(Long id) {

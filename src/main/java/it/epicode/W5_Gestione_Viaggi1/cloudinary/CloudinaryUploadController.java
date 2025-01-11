@@ -24,7 +24,7 @@ public class CloudinaryUploadController {
 
         Map result = cloudinaryService.uploader(file, folder);
         // se si vuole restituire solo url usare il get della mappa
-        // result.get("url");
+         result.get("url");
 
         return ResponseEntity.ok(result);
     }
