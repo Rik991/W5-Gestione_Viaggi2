@@ -27,21 +27,12 @@ public class DipendenteService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    @Autowired
-    private Cloudinary cloudinary;
-
-
 
     public Dipendente uploadAvatar(Long dipendenteId, MultipartFile file) {
         Dipendente dipendente = findById(dipendenteId);
-        try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            String avatarUrl = uploadResult.get("url").toString();
-            dipendente.setAvatar(avatarUrl);
+            Map uploadResult = cloudinaryService.uploader(file, "dipendenti");
+            dipendente.setAvatar(uploadResult.get("url").toString());
             return dipendenteRepo.save(dipendente);
-        } catch (Exception e) {
-            throw new UploadException("Errore durante il caricamento dell'immagine", e);
-        }
     }
 
 
